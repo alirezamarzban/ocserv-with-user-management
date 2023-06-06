@@ -31,4 +31,4 @@
   </ul>
 <hr>
 <h3>donate:</h3>
-<a href="https://paypal.me/JelsonMendozaAntoniof" target="_blank">if you liked this project, please buy me a coffee</a>
+<a href="https://paypal.me/JelsonMendozaAntonio" target="_blank">if you liked this project, please buy me a coffee</a>
