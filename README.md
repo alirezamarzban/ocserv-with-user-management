@@ -1,9 +1,9 @@
 # ocserv-with-user-management
 <h3>automaticly install and configure, fully control on ocserv</h3>
 
-deploy ocserv on ubuntu server
+  ✅ deploy ocserv on ubuntu server
 
-tested on ubuntu 18, 20, 22
+  ✅ tested on ubuntu 18, 20, 22
 <hr>
 <h3>installation:</h3>
 
