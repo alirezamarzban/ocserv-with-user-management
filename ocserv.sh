@@ -234,20 +234,16 @@ certtool --generate-privkey --outfile server-key.pem
 certtool --generate-certificate --load-privkey server-key.pem --load-ca-certificate ca-cert.pem --load-ca-privkey ca-key.pem --template server.tmpl --outfile server-cert.pem
 echo -e "\e[32mInstalling ocserv\e[39m"
 apt install ocserv -y
-apt install wget curl nano software-properties-common dirmngr apt-transport-https gnupg2 ca-certificates lsb-release ubuntu-keyring unzip -y
-apt install -y libgnutls28-dev libev-dev libpam0g-dev liblz4-dev libseccomp-dev \
-	libreadline-dev libnl-route-3-dev libkrb5-dev libradcli-dev \
-	libcurl4-gnutls-dev libcjose-dev libjansson-dev libprotobuf-c-dev \
-	libtalloc-dev libhttp-parser-dev protobuf-c-compiler gperf \
-	nuttcp lcov libuid-wrapper libpam-wrapper libnss-wrapper \
-	libsocket-wrapper gss-ntlmssp haproxy iputils-ping freeradius \
-	gawk gnutls-bin iproute2 yajl-tools tcpdump autoconf automake -y
-git clone https://gitlab.com/openconnect/ocserv.git
-cd ocserv
-autoreconf -fvi
-./configure && make
+apt-get install vim net-tools pkg-config build-essential libgnutls28-dev libwrap0-dev liblz4-dev libseccomp-dev libreadline-dev libnl-nf-3-dev libev-dev gnutls-bin -y
+wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.1.7.tar.xz
+tar -xf ocserv-1.1.7.tar.xz
+cd ocserv-1.1.7
+./configure
+make
 make install
 cd ..
+rm -rf ocserv-1.1.7.tar.xz
+rm -rf ocserv-1.1.7
 cp /lib/systemd/system/ocserv.service /etc/systemd/system/ocserv.service
 sed -i -e 's@ExecStart=/usr/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@ExecStart=/usr/local/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@g' /etc/systemd/system/ocserv.service
 systemctl daemon-reload
@@ -335,3 +331,4 @@ if [[ "$EUID" -ne 0 ]]; then
 	echo "please run as root"
 	exit 1
 fi
+		
