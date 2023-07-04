@@ -173,17 +173,16 @@ else
 fi
 }
 install_and_configure() {
-echo "deb http://archive.ubuntu.com/ubuntu/packages jammy main restricted
-deb http://archive.ubuntu.com/ubuntu/packages jammy-updates main restricted
-deb http://archive.ubuntu.com/ubuntu/packages jammy universe
-deb http://archive.ubuntu.com/ubuntu/packages jammy-updates universe
-deb http://archive.ubuntu.com/ubuntu/packages jammy multiverse
-deb http://archive.ubuntu.com/ubuntu/packages jammy-updates multiverse
-deb http://archive.ubuntu.com/ubuntu/packages jammy-backports main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu/security jammy-security main restricted
-deb http://archive.ubuntu.com/ubuntu/security jammy-security universe
-deb http://archive.ubuntu.com/ubuntu/security jammy-security multiverse
-" > /etc/apt/sources.list
+echo "deb http://archive.ubuntu.com/ubuntu jammy main restricted
+deb http://archive.ubuntu.com/ubuntu jammy-updates main restricted
+deb http://archive.ubuntu.com/ubuntu jammy universe
+deb http://archive.ubuntu.com/ubuntu jammy-updates universe
+deb http://archive.ubuntu.com/ubuntu jammy multiverse
+deb http://archive.ubuntu.com/ubuntu jammy-updates multiverse
+deb http://archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu jammy-security main restricted
+deb http://archive.ubuntu.com/ubuntu jammy-security universe
+deb http://archive.ubuntu.com/ubuntu jammy-security multiverse" > /etc/apt/sources.list
 rm -rf /etc/resolv.conf
 echo "nameserver 8.8.8.8
 nameserver 8.8.4.4" > /etc/resolv.conf
@@ -333,4 +332,3 @@ if [[ "$EUID" -ne 0 ]]; then
 	exit 1
 fi
 		
-	
