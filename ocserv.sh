@@ -257,7 +257,7 @@ sed -i -e 's@ipv4-network = 192.168.1.0@ipv4-network = 192.168.0.0@g' /etc/ocser
 sed -i -e 's@ipv4-netmask = 255.255.255.0@ipv4-netmask = 255.255.0.0@g' /etc/ocserv/ocserv.conf
 sed -i -e 's@#tunnel-all-dns = true@tunnel-all-dns = true@g' /etc/ocserv/ocserv.conf
 sed -i -e 's@#config-per-user = /etc/ocserv/config-per-user/@config-per-user = /etc/ocserv/config-per-user/@g' /etc/ocserv/ocserv.conf
-sed -i -e 's@#config-per-group = /etc/ocserv/config-per-group/@#config-per-group = /etc/ocserv/config-per-group/@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@#config-per-group = /etc/ocserv/config-per-group/@config-per-group = /etc/ocserv/config-per-group/@g' /etc/ocserv/ocserv.conf
 mkdir /etc/ocserv/config-per-user/
 mkdir /etc/ocserv/config-per-group/
 touch /etc/ocserv/config-per-user/user1
