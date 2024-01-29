@@ -9,6 +9,7 @@ echo "2: restart ocserv"
 echo "3: stop ocserv"
 echo "4: ocserv status"
 echo "5: return to main menu"
+echo "6: exit ocserv"
 read -r
 user_selection=$REPLY
 if [ $user_selection -eq "1" ]
@@ -26,6 +27,9 @@ then
 elif [ $user_selection -eq "5" ]
 then
   main
+elif [ $user_selection -eq "6" ]
+then
+  exit
 else
   echo "invalid option"
   echo ""
@@ -54,6 +58,7 @@ echo "15: show connectted users count"
 echo "16: show users Connection Software type"
 echo "17: disconnect the specified user"
 echo "18: return to main menu"
+echo "19: exit ocserv"
 read -r
 user_selection=$REPLY
 if [ $user_selection -eq "1" ]
@@ -167,12 +172,203 @@ then
 elif [ $user_selection -eq "18" ]
 then
   main
+elif [ $user_selection -eq "19" ]
+then
+  exit
 else
   echo "invalid option"
   echo ""
 fi
 }
-install_and_configure() {
+install_and_configure_ocserv_with_lets_encrypt() {
+rm -rf /etc/resolv.conf
+echo "nameserver 8.8.8.8
+nameserver 8.8.4.4" > /etc/resolv.conf
+apt-get update
+sed -i -e 's@#net.ipv4.ip_forward=1@net.ipv4.ip_forward=1@g' /etc/sysctl.conf
+sysctl -p /etc/sysctl.conf
+echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/60-custom.conf
+echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.d/60-custom.conf
+echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.d/60-custom.conf
+sysctl net.ipv4.tcp_available_congestion_control
+sysctl net.ipv4.tcp_congestion_control
+echo "net.core.default_qdisc=fq
+net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+sudo sysctl -p
+sysctl net.ipv4.tcp_congestion_control
+sudo sysctl -p /etc/sysctl.d/60-custom.conf
+apt install iptables -y
+apt install iptables-persistent -y
+iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables-save > /etc/iptables/rules.v4
+ip=$(hostname -I|cut -f1 -d ' ')
+echo "your server ip address is:$ip"
+echo -e "\e[32mInstalling gnutls-bin\e[39m"
+apt install gnutls-bin -y
+echo -e "\e[32mInstalling ocserv\e[39m"
+apt install ocserv -y
+apt-get install vim net-tools pkg-config build-essential libgnutls28-dev libwrap0-dev liblz4-dev libseccomp-dev libreadline-dev libnl-nf-3-dev libev-dev gnutls-bin -y
+wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.3.tar.xz
+tar -xf ocserv-1.2.3.tar.xz
+cd ocserv-1.2.3
+./configure
+make
+make install
+cd ..
+rm -rf ocserv-1.2.3.tar.xz
+rm -rf ocserv-1.2.3
+cp /lib/systemd/system/ocserv.service /etc/systemd/system/ocserv.service
+sed -i -e 's@ExecStart=/usr/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@ExecStart=/usr/local/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@g' /etc/systemd/system/ocserv.service
+systemctl daemon-reload
+sed -i -e 's@auth = "@#auth = "@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@auth = "pam@auth = "#auth = "pam"@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@try-mtu-discovery = false@try-mtu-discovery = true@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@dns = 1.1.1.1@dns = 8.8.4.4@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@route =@#route =@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@no-route =@#no-route =@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@cisco-client-compat@cisco-client-compat = true@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@##auth = "#auth = "pam""@auth = "plain[passwd=/etc/ocserv/ocpasswd]"@g' /etc/ocserv/ocserv.conf
+sed -i -e "s@server-cert = /etc/ssl/certs/ssl-cert-snakeoil.pem@server-cert = /etc/letsencrypt/live/$your_domain/fullchain.pem@g" /etc/ocserv/ocserv.conf
+sed -i -e "s@server-key = /etc/ssl/private/ssl-cert-snakeoil.key@server-key = /etc/letsencrypt/live/$your_domain/privkey.pem@g" /etc/ocserv/ocserv.conf
+sed -i -e 's@max-clients = 128@max-clients = 0@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@max-same-clients = 2@max-same-clients = 0@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@keepalive = 300@keepalive = 3000@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@tls-priorities = "NORMAL:%SERVER_PRECEDENCE:%COMPAT:-RSA:-VERS-SSL3.0:-ARCFOUR-128"@tls-priorities = "NORMAL:%SERVER_PRECEDENCE:%COMPAT:-RSA:-VERS-SSL3.0:-ARCFOUR-128:-VERS-TLS1.0:-VERS-TLS1.1"@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@max-ban-score = 80@max-ban-score = 0@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@ipv4-network = 192.168.1.0@ipv4-network = 192.168.0.0@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@ipv4-netmask = 255.255.255.0@ipv4-netmask = 255.255.0.0@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@#tunnel-all-dns = true@tunnel-all-dns = true@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@#config-per-user = /etc/ocserv/config-per-user/@config-per-user = /etc/ocserv/config-per-user/@g' /etc/ocserv/ocserv.conf
+sed -i -e 's@#config-per-group = /etc/ocserv/config-per-group/@config-per-group = /etc/ocserv/config-per-group/@g' /etc/ocserv/ocserv.conf
+mkdir /etc/ocserv/config-per-user/
+mkdir /etc/ocserv/config-per-group/
+touch /etc/ocserv/config-per-user/user1
+touch /etc/ocserv/config-per-user/user2
+touch /etc/ocserv/config-per-user/user3
+touch /etc/ocserv/config-per-user/user4
+touch /etc/ocserv/config-per-user/user5
+touch /etc/ocserv/config-per-group/group1
+touch /etc/ocserv/config-per-group/group2
+touch /etc/ocserv/config-per-group/group3
+touch /etc/ocserv/config-per-group/group4
+touch /etc/ocserv/config-per-group/group5
+echo "max-same-clients = 1" > /etc/ocserv/config-per-group/group1
+echo "max-same-clients = 2" > /etc/ocserv/config-per-group/group2
+echo "max-same-clients = 3" > /etc/ocserv/config-per-group/group3
+echo "max-same-clients = 4" > /etc/ocserv/config-per-group/group4
+echo "max-same-clients = 5" > /etc/ocserv/config-per-group/group5
+echo "Enter a username:"
+read username
+ocpasswd -c /etc/ocserv/ocpasswd $username
+echo -e "\e[32mStopping ocserv service\e[39m"
+service ocserv stop
+echo -e "\e[32mStarting ocserv service\e[39m"
+service ocserv start
+echo "OpenConnect Server Configured Succesfully"
+}
+webroot_plugin() {
+echo "please choose your webroot plugin"
+echo "1: apache"
+echo "2: nginx"
+echo "3: return to previous menu"
+echo "4: exit ocserv"
+read -r
+user_selection=$REPLY
+if [ $user_selection -eq "1" ]
+then
+  echo "enter your email:"
+  read your_email
+  echo "enter your domain:"
+  read your_domain
+  echo -e "\e[32mInstalling certbot and apache2\e[39m"
+  apt install certbot -y
+  apt install apache2 -y
+  echo "<VirtualHost *:80>        
+        ServerName $your_domain
+
+        DocumentRoot /var/www/ocserv
+</VirtualHost>" > /etc/apache2/sites-available/$your_domain.conf
+  sudo mkdir /var/www/ocserv
+  sudo chown www-data:www-data /var/www/ocserv -R
+  sudo a2ensite $your_domain
+  sudo systemctl reload apache2
+  sudo certbot certonly --webroot --agree-tos --email $your_email -d $your_domain -w /var/www/ocserv
+  install_and_configure_ocserv_with_lets_encrypt
+elif [ $user_selection -eq "2" ]
+then
+  echo "enter your email:"
+  read your_email
+  echo "enter your domain:"
+  read your_domain
+  echo -e "\e[32mInstalling certbot and nginx\e[39m"
+  apt install certbot -y
+  apt install nginx -y
+  echo "server {
+      listen 80;
+      server_name $your_domain;
+
+      root /var/www/ocserv/;
+
+      location ~ /.well-known/acme-challenge {
+         allow all;
+      }
+}" > /etc/nginx/conf.d/$your_domain.conf
+  sudo mkdir -p /var/www/ocserv
+  sudo chown www-data:www-data /var/www/ocserv -R
+  sudo systemctl reload nginx
+  sudo certbot certonly --webroot --agree-tos --email $your_email -d $your_domain -w /var/www/ocserv
+  install_and_configure_ocserv_with_lets_encrypt
+elif [ $user_selection -eq "3" ]
+then
+  obtain_a_trusted_tls_certificate_from_lets_encrypt
+  elif [ $user_selection -eq "4" ]
+then
+  exit
+else
+  echo "invalid option"
+  echo ""
+fi
+}
+standalone_plugin() {
+echo "enter your email:"
+read your_email
+echo "enter your domain:"
+read your_domain
+echo -e "\e[32mInstalling certbot\e[39m"
+apt install certbot -y
+sudo certbot certonly --standalone --preferred-challenges http --agree-tos --email $your_email -d $your_domain
+install_and_configure_ocserv_with_lets_encrypt
+}
+obtain_a_trusted_tls_certificate_from_lets_encrypt() {
+echo "please choose your certificate action"
+echo "1: standalone plugin"
+echo "2: webroot plugin"
+echo "3: renew"
+echo "4: return to previous menu"
+echo "5: exit ocserv"
+read -r
+user_selection=$REPLY
+if [ $user_selection -eq "1" ]
+then
+  standalone_plugin
+elif [ $user_selection -eq "2" ]
+then
+  webroot_plugin
+elif [ $user_selection -eq "3" ]
+then
+  certbot renew
+elif [ $user_selection -eq "4" ]
+then
+  install_and_configure
+elif [ $user_selection -eq "5" ]
+then
+  exit
+else
+  echo "invalid option"
+  echo ""
+fi
+}
+install_and_configure_ocserv_without_lets_encrypt() {
 rm -rf /etc/resolv.conf
 echo "nameserver 8.8.8.8
 nameserver 8.8.4.4" > /etc/resolv.conf
@@ -286,15 +482,44 @@ echo -e "\e[32mStarting ocserv service\e[39m"
 service ocserv start
 echo "OpenConnect Server Configured Succesfully"
 }
+install_and_configure() {
+echo -e "
+welcome to ocserv installation and configuration
+"
+echo "please select your installation and configuration mode"
+echo "1: install and configure ocserv without let's encrypt"
+echo "2: install and configure ocserv with let's encrypt"
+echo "3: return to main menu"
+echo "4: exit ocserv"
+read -r
+user_selection=$REPLY
+if [ $user_selection -eq "1" ]
+then
+  install_and_configure_ocserv_without_lets_encrypt
+elif [ $user_selection -eq "2" ]
+then
+  obtain_a_trusted_tls_certificate_from_lets_encrypt
+elif [ $user_selection -eq "3" ]
+then
+  main
+elif [ $user_selection -eq "4" ]
+then
+  exit
+else
+  echo "invalid option"
+  echo ""
+fi
+}
 main() {
 echo -e "
 welcome to ocserv
 "
-echo "Please select your option"
+echo "please select your option"
 echo "1: install and configure ocserv"
 echo "2: uninstall ocserv"
 echo "3: ocserv user management"
 echo "4: ocserv management"
+echo "5: exit ocserv"
 read -r
 user_selection=$REPLY
 if [ $user_selection -eq "1" ]
@@ -311,6 +536,9 @@ then
 elif [ $user_selection -eq "4" ]
 then
   ocserv_management
+elif [ $user_selection -eq "5" ]
+then
+  exit
 else
   echo "invalid option"
   echo ""
