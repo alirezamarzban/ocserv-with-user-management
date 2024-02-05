@@ -35,4 +35,4 @@
   </ul>
 <hr>
 <h3>donate:</h3>
-<a href="malasorte037@gmail.com" target="_blank">if you liked this project, please buy me a coffee by this wise account</a>
+<a href="https://malasorte037@gmail.com" target="_blank">if you liked this project, please buy me a coffee by this wise account</a>
