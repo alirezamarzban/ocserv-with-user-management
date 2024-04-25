@@ -208,7 +208,7 @@ apt install gnutls-bin -y
 echo -e "\e[32mInstalling ocserv\e[39m"
 apt install ocserv -y
 apt-get install vim net-tools pkg-config build-essential libgnutls28-dev libwrap0-dev liblz4-dev libseccomp-dev libreadline-dev libnl-nf-3-dev libev-dev gnutls-bin -y
-wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.3.tar.xz
+wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.4.tar.xz
 tar -xf ocserv-1.2.3.tar.xz
 cd ocserv-1.2.3
 ./configure
@@ -421,7 +421,7 @@ certtool --generate-certificate --load-privkey server-key.pem --load-ca-certific
 echo -e "\e[32mInstalling ocserv\e[39m"
 apt install ocserv -y
 apt-get install vim net-tools pkg-config build-essential libgnutls28-dev libwrap0-dev liblz4-dev libseccomp-dev libreadline-dev libnl-nf-3-dev libev-dev gnutls-bin -y
-wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.3.tar.xz
+wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.4.tar.xz
 tar -xf ocserv-1.2.3.tar.xz
 cd ocserv-1.2.3
 ./configure
