@@ -208,15 +208,15 @@ apt install gnutls-bin -y
 echo -e "\e[32mInstalling ocserv\e[39m"
 apt install ocserv -y
 apt-get install vim net-tools pkg-config build-essential libgnutls28-dev libwrap0-dev liblz4-dev libseccomp-dev libreadline-dev libnl-nf-3-dev libev-dev gnutls-bin -y
-wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.4.tar.xz
-tar -xf ocserv-1.2.4.tar.xz
-cd ocserv-1.2.4
+wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.3.0.tar.xz
+tar -xf ocserv-1.3.0.tar.xz
+cd ocserv-1.3.0
 ./configure
 make
 make install
 cd ..
-rm -rf ocserv-1.2.4.tar.xz
-rm -rf ocserv-1.2.4
+rm -rf ocserv-1.3.0.tar.xz
+rm -rf ocserv-1.3.0
 cp /lib/systemd/system/ocserv.service /etc/systemd/system/ocserv.service
 sed -i -e 's@ExecStart=/usr/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@ExecStart=/usr/local/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@g' /etc/systemd/system/ocserv.service
 systemctl daemon-reload
@@ -421,15 +421,15 @@ certtool --generate-certificate --load-privkey server-key.pem --load-ca-certific
 echo -e "\e[32mInstalling ocserv\e[39m"
 apt install ocserv -y
 apt-get install vim net-tools pkg-config build-essential libgnutls28-dev libwrap0-dev liblz4-dev libseccomp-dev libreadline-dev libnl-nf-3-dev libev-dev gnutls-bin -y
-wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.2.4.tar.xz
-tar -xf ocserv-1.2.4.tar.xz
-cd ocserv-1.2.4
+wget -N --no-check-certificate https://www.infradead.org/ocserv/download/ocserv-1.3.0.tar.xz
+tar -xf ocserv-1.3.0.tar.xz
+cd ocserv-1.3.0
 ./configure
 make
 make install
 cd ..
-rm -rf ocserv-1.2.4.tar.xz
-rm -rf ocserv-1.2.4
+rm -rf ocserv-1.3.0.tar.xz
+rm -rf ocserv-1.3.0
 cp /lib/systemd/system/ocserv.service /etc/systemd/system/ocserv.service
 sed -i -e 's@ExecStart=/usr/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@ExecStart=/usr/local/sbin/ocserv --foreground --pid-file /run/ocserv.pid --config /etc/ocserv/ocserv.conf@g' /etc/systemd/system/ocserv.service
 systemctl daemon-reload
