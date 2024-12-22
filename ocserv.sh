@@ -237,8 +237,8 @@ EOF
   sed -i -e 's@##auth = "#auth = "pam""@auth = "plain[passwd=/etc/ocserv/ocpasswd]"@g' /etc/ocserv/ocserv.conf
 
   # Change the certificate/key paths to the user's domain
-  sed -i -e "s@server-cert = /etc/ssl/certs/ssl-cert-snakeoil.pem@server-cert = /etc/letsencrypt/live/\$your_domain/fullchain.pem@g" /etc/ocserv/ocserv.conf
-  sed -i -e "s@server-key = /etc/ssl/private/ssl-cert-snakeoil.key@server-key = /etc/letsencrypt/live/\$your_domain/privkey.pem@g" /etc/ocserv/ocserv.conf
+  sed -i "s@^server-cert = .*@server-cert = /etc/letsencrypt/live/$your_domain/fullchain.pem@g" /etc/ocserv/ocserv.conf
+  sed -i "s@^server-key = .*@server-key = /etc/letsencrypt/live/$your_domain/privkey.pem@g" /etc/ocserv/ocserv.conf
   sed -i "s@^ca-cert = .*@ca-cert = /etc/letsencrypt/live/$your_domain/chain.pem@g" /etc/ocserv/ocserv.conf
 
   sed -i -e 's@max-clients = 128@max-clients = 0@g' /etc/ocserv/ocserv.conf
@@ -467,9 +467,6 @@ EOF
   sed -i -e 's@try-mtu-discovery = false@try-mtu-discovery = true@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@dns = 1.1.1.1@dns = 8.8.4.4@g' /etc/ocserv/ocserv.conf
 
-  # Remove commenting of all route lines and apply route = default
-  sed -i -e 's@no-route =@#no-route =@g' /etc/ocserv/ocserv.conf
-  sed -i -e 's@cisco-client-compat@cisco-client-compat = true@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@##auth = "#auth = "pam""@auth = "plain[passwd=/etc/ocserv/ocpasswd]"@g' /etc/ocserv/ocserv.conf
 
   sed -i -e 's@server-cert = /etc/ssl/certs/ssl-cert-snakeoil.pem@server-cert = /etc/ocserv/server-cert.pem@g' /etc/ocserv/ocserv.conf
@@ -477,12 +474,15 @@ EOF
 
   sed -i -e 's@max-clients = 128@max-clients = 0@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@max-same-clients = 2@max-same-clients = 0@g' /etc/ocserv/ocserv.conf
-  sed -i -e 's@keepalive = 300@keepalive = 3000@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@tls-priorities = "NORMAL:%SERVER_PRECEDENCE:%COMPAT:-RSA:-VERS-SSL3.0:-ARCFOUR-128"@tls-priorities = "NORMAL:%SERVER_PRECEDENCE:%COMPAT:-RSA:-VERS-SSL3.0:-ARCFOUR-128:-VERS-TLS1.0:-VERS-TLS1.1"@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@max-ban-score = 80@max-ban-score = 0@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@ipv4-network = 192.168.1.0@ipv4-network = 192.168.0.0@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@ipv4-netmask = 255.255.255.0@ipv4-netmask = 255.255.0.0@g' /etc/ocserv/ocserv.conf
+
+  # Enable tunnel-all-dns
   sed -i -e 's@#tunnel-all-dns = true@tunnel-all-dns = true@g' /etc/ocserv/ocserv.conf
+
+  # Enable config-per-user/group
   sed -i -e 's@#config-per-user = /etc/ocserv/config-per-user/@config-per-user = /etc/ocserv/config-per-user/@g' /etc/ocserv/ocserv.conf
   sed -i -e 's@#config-per-group = /etc/ocserv/config-per-group/@config-per-group = /etc/ocserv/config-per-group/@g' /etc/ocserv/ocserv.conf
 
